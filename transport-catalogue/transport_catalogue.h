@@ -21,7 +21,7 @@ struct Stop {
 struct Bus {
     std::string name;
     std::deque<Stop*> route;
-    std::unordered_set<Stop*> unique;
+    int unique = 0;
 };
 
 struct StatBuses {
@@ -34,7 +34,6 @@ struct StatBuses {
 
 struct StatStops {
     bool empty = true;
-    bool empty_bus = true;
     std::set<std::string> name_bus;
 };
 
@@ -51,10 +50,10 @@ private:
 struct HasherStop {
 public:
     std::size_t operator()(Stop* stop) const {
-        return name_hash(stop->name) * 75 * 75 * 75 +
-            name_size_hash(stop->name.size()) * 75 * 75 * 75 * 75 +
-            coord_hash(stop->coordinate.lat) * 75 * 75 * 75 * 75 * 75 +
-            coord_hash(stop->coordinate.lng) * 75 * 75 * 75 * 75 * 75 * 75;
+        return name_hash(stop->name) +
+            name_size_hash(stop->name.size()) +
+            coord_hash(stop->coordinate.lat) * 75 +
+            coord_hash(stop->coordinate.lng) * 75 * 75;
     }
 private:
     std::hash<std::string_view> name_hash;
@@ -65,8 +64,8 @@ private:
 struct HasherPair {
 public:
     std::size_t operator()(std::pair<Stop*, Stop*> stop) const {
-        return stop_hash(stop.first) * 75 * 75 * 75 * 75 * 75 * 75 * 75 +
-        stop_hash(stop.second) * 75 * 75 * 75 * 75 * 75 * 75 * 75 * 75;
+        return stop_hash(stop.first) * 75 +
+        stop_hash(stop.second) * 75 * 75;
     }
 private:
     std::hash<const void*> stop_hash;
@@ -74,16 +73,16 @@ private:
 
 class TransportCatalogue {
 public:
-    void MarkDistance();
-    void AddStop(std::string_view);
-    void AddBus(std::string_view);
+    void AddDistance(std::pair<Stop*, Stop*> stops_from_to, int dist);
+    void AddStop(Stop stop_);
+    void AddBus(Bus bus_);
 
-    Stop* FindStop(std::string_view);
-    Bus* FindBus(std::string_view);
-    int FindDistance(Stop*, Stop*);
+    Stop* FindStop(std::string_view stop_name);
+    Bus* FindBus(std::string_view bus_name);
+    int FindDistance(Stop* x, Stop* y);
 
-    StatBuses StatBus(std::string_view);
-    StatStops StatStop(std::string_view);
+    StatBuses ReturnStatBus(std::string_view bus_name);
+    StatStops ReturnStatStop(std::string_view stop_name);
 private:
     std::deque<Stop> stops_;
     std::deque<Bus> buses_;

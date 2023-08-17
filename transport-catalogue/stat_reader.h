@@ -2,10 +2,17 @@
 
 #include "transport_catalogue.h"
 
+#include <ostream>
+#include <sstream>
+#include <iostream>
+
 namespace transport_catalogue {
 namespace output {
 
-void Stat(TransportCatalogue&);
+void ReturnStats(TransportCatalogue& transport, std::ostream& out);
+
+void DisplayStatBus(TransportCatalogue& transport, std::string_view command, std::ostream& out);
+void DisplayStatStop(TransportCatalogue& transport, std::string_view command, std::ostream& out);
 
 } //end output
 } //end transport_catalogue

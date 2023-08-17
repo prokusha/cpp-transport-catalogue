@@ -27,7 +27,7 @@ ostream& operator<<(ostream& out, StatStops stat) {
         out << "not found";
         return out;
     }
-    if (stat.empty_bus) {
+    if (stat.name_bus.empty()) {
         out << "no buses";
         return out;
     }
@@ -40,17 +40,25 @@ ostream& operator<<(ostream& out, StatStops stat) {
     return out;
 }
 
-void Stat(TransportCatalogue& transport) {
+void ReturnStats(TransportCatalogue& transport, ostream& out) {
     int count = input::ReadLineWithNumber();
 
     for (int it = 0; it < count; ++it) {
         string command = input::ReadLine();
         if (command[0] == 'B') {
-            cout << command << ": " << transport.StatBus(command) << endl;
+            DisplayStatBus(transport, command, out);
         } else if (command[0] == 'S') {
-            cout << command << ": " << transport.StatStop(command) << endl;
+            DisplayStatStop(transport, command, out);
         }
     }
+}
+
+void DisplayStatBus(TransportCatalogue& transport, string_view command, ostream& out) {
+    out << command << ": " << transport.ReturnStatBus(command) << endl;
+}
+
+void DisplayStatStop(TransportCatalogue& transport, string_view command, ostream& out) {
+    out << command << ": " << transport.ReturnStatStop(command) << endl;
 }
 
 } //end output

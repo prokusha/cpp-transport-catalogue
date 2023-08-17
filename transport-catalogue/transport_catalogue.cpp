@@ -51,20 +51,22 @@ StatBuses TransportCatalogue::ReturnStatBus(string_view bus_name) {
     auto bus = FindBus(bus_name);
     if (bus) {
         int route = bus->route.size();
-        int unique = 0;
+        vector<Stop*> unique;
         int length_distance = 0;
         double length_coordinate = 0.0;
         double curvature = 0.0;
 
         auto start = bus->route[0];
         for (auto& stop : bus->route) {
-            unique += count(bus->route.begin(), bus->route.end(), stop) < 1 ? 1 : 0;
+            if (find(unique.begin(), unique.end(), stop) == unique.end()) {
+                unique.push_back(stop);
+            }
             length_coordinate += ComputeDistance(start->coordinate, stop->coordinate);
             length_distance += FindDistance(start, stop);
             start = stop;
         }
         curvature = length_distance / length_coordinate;
-        return {false, route, unique, length_distance, curvature};
+        return {false, route, static_cast<int>(unique.size()), length_distance, curvature};
     }
     return {};
 }

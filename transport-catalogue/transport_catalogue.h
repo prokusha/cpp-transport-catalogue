@@ -21,7 +21,6 @@ struct Stop {
 struct Bus {
     std::string name;
     std::deque<Stop*> route;
-    int unique = 0;
 };
 
 struct StatBuses {
@@ -73,13 +72,13 @@ private:
 
 class TransportCatalogue {
 public:
-    void AddDistance(std::pair<Stop*, Stop*> stops_from_to, int dist);
-    void AddStop(Stop stop_);
-    void AddBus(Bus bus_);
+    void AddDistance(Stop* stop_from, Stop* stop_to, int dist);
+    void AddStop(const Stop& stop_);
+    void AddBus(const Bus& bus_);
 
     Stop* FindStop(std::string_view stop_name);
     Bus* FindBus(std::string_view bus_name);
-    int FindDistance(Stop* x, Stop* y);
+    int FindDistance(Stop* stop_from, Stop* stop_to);
 
     StatBuses ReturnStatBus(std::string_view bus_name);
     StatStops ReturnStatStop(std::string_view stop_name);

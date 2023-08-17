@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <istream>
 
 namespace transport_catalogue {
 namespace detail {
@@ -25,11 +26,11 @@ struct waitlist {
     std::vector<std::string> bus;
 };
 
-std::string ReadLine();
+std::string ReadLine(std::istream& in);
 
-int ReadLineWithNumber();
+int ReadLineWithNumber(std::istream& in);
 
-void Add(TransportCatalogue& transport);
+void Add(TransportCatalogue& transport, std::istream& in);
 
 } //end input
 } //end transport_catalogue

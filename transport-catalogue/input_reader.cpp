@@ -58,12 +58,10 @@ Bus MakeBus(string_view command, TransportCatalogue& transport) {
 
     while(detail::string_refactoring::FindSimbol(command, find_) != command.end()) {
         stop = transport.FindStop(string{command.begin(), detail::string_refactoring::FindSimbol(command, find_) - 1});
-        bus_.unique += count(bus_.route.begin(), bus_.route.end(), stop) >= 1 ? 0 : 1;
         bus_.route.push_back(stop);
         command.remove_prefix(command.find(find_) + 2);
     }
     stop = transport.FindStop(command);
-    bus_.unique += count(bus_.route.begin(), bus_.route.end(), stop) < 1 ? 1 : 0;
     bus_.route.push_back(stop);
 
     if (reverse_) {
@@ -76,22 +74,22 @@ Bus MakeBus(string_view command, TransportCatalogue& transport) {
 
 void MarkDistance(TransportCatalogue& transport) {
     int dist = 0;
-    Stop* x = nullptr;
-    Stop* y = nullptr;
-    for (auto& [stop_from, command] : distance_temp) {
+    Stop* stop_from = nullptr;
+    Stop* stop_to = nullptr;
+    for (auto& [stop, command] : distance_temp) {
         string_view sv = command;
-        x = transport.FindStop(stop_from);
+        stop_from = transport.FindStop(stop);
         while (FindSimbol(sv, ',') != sv.end()) {
             dist = stoi(string{sv.begin(), detail::string_refactoring::FindSimbol(sv, 'm')});
             sv.remove_prefix(sv.find('m') + 5);
-            y = transport.FindStop(string{sv.begin(), detail::string_refactoring::FindSimbol(sv, ',')});
-            transport.AddDistance({x, y}, dist);
+            stop_to = transport.FindStop(string{sv.begin(), detail::string_refactoring::FindSimbol(sv, ',')});
+            transport.AddDistance(stop_from, stop_to, dist);
             sv.remove_prefix(sv.find(',') + 1);
         }
         dist = stoi(string{sv.begin(), detail::string_refactoring::FindSimbol(sv, 'm')});
         sv.remove_prefix(sv.find('m') + 5);
-        y = transport.FindStop(string{sv});
-        transport.AddDistance({x, y}, dist);
+        stop_to = transport.FindStop(string{sv});
+        transport.AddDistance(stop_from, stop_to, dist);
     }
 }
 
@@ -100,23 +98,23 @@ void MarkDistance(TransportCatalogue& transport) {
 
 namespace input {
 
-string ReadLine() {
+string ReadLine(istream& in) {
     string s;
-    getline(cin, s);
+    getline(in, s);
     return s;
 }
 
-int ReadLineWithNumber() {
+int ReadLineWithNumber(istream& in) {
     int result;
-    cin >> result;
-    ReadLine();
+    in >> result;
+    ReadLine(in);
     return result;
 }
 
-void Add(TransportCatalogue& transport) {
-    int count = ReadLineWithNumber();
+void Add(TransportCatalogue& transport, istream& in) {
+    int count = ReadLineWithNumber(in);
     for (int it = 0; it < count; ++it) {
-        string command = ReadLine();
+        string command = ReadLine(in);
         if (command[0] == 'S') {
             transport.AddStop(std::move(detail::string_refactoring::MakeStop(command)));
         } else {

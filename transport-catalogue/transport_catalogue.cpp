@@ -11,17 +11,17 @@ using namespace std;
 
 namespace transport_catalogue {
 
-void TransportCatalogue::AddDistance(pair<Stop*, Stop*> stops_from_to, int dist) {
-    distance_[stops_from_to] = dist;
+void TransportCatalogue::AddDistance(Stop* stop_from, Stop* stop_to, int dist) {
+    distance_[{stop_from, stop_to}] = dist;
 }
 
-void TransportCatalogue::AddStop(Stop stop_) {
+void TransportCatalogue::AddStop(const Stop& stop_) {
     stops_.push_back(std::move(stop_));
     named_stops_[stops_.back().name] = &stops_.back();
     stops_buses_[&stops_.back()];
 }
 
-void TransportCatalogue::AddBus(Bus bus_) {
+void TransportCatalogue::AddBus(const Bus& bus_) {
     buses_.push_back(bus_);
     named_buses_[buses_.back().name] = &buses_.back();
     for (auto& stop : buses_.back().route) {
@@ -37,11 +37,11 @@ Bus* TransportCatalogue::FindBus(string_view bus_name) {
     return named_buses_.count(bus_name) ? named_buses_.at(bus_name) : nullptr;
 }
 
-int TransportCatalogue::FindDistance(Stop* x, Stop* y) {
-    if (distance_.count({x, y})) {
-        return distance_.at({x, y});
-    } else if (distance_.count({y, x})) {
-        return distance_.at({y, x});
+int TransportCatalogue::FindDistance(Stop* stop_from, Stop* stop_to) {
+    if (distance_.count({stop_from, stop_to})) {
+        return distance_.at({stop_from, stop_to});
+    } else if (distance_.count({stop_to, stop_from})) {
+        return distance_.at({stop_to, stop_from});
     }
     return 0;
 }
@@ -51,13 +51,14 @@ StatBuses TransportCatalogue::ReturnStatBus(string_view bus_name) {
     auto bus = FindBus(bus_name);
     if (bus) {
         int route = bus->route.size();
-        int unique = bus->unique;
+        int unique = 0;
         int length_distance = 0;
         double length_coordinate = 0.0;
         double curvature = 0.0;
 
         auto start = bus->route[0];
         for (auto& stop : bus->route) {
+            unique += count(bus->route.begin(), bus->route.end(), stop) < 1 ? 1 : 0;
             length_coordinate += ComputeDistance(start->coordinate, stop->coordinate);
             length_distance += FindDistance(start, stop);
             start = stop;

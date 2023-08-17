@@ -40,11 +40,11 @@ ostream& operator<<(ostream& out, StatStops stat) {
     return out;
 }
 
-void ReturnStats(TransportCatalogue& transport, ostream& out) {
-    int count = input::ReadLineWithNumber();
+void ReturnStats(TransportCatalogue& transport, istream& in, ostream& out) {
+    int count = input::ReadLineWithNumber(in);
 
     for (int it = 0; it < count; ++it) {
-        string command = input::ReadLine();
+        string command = input::ReadLine(in);
         if (command[0] == 'B') {
             DisplayStatBus(transport, command, out);
         } else if (command[0] == 'S') {

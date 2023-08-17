@@ -1,5 +1,4 @@
 #include "stat_reader.h"
-#include "input_reader.h"
 #include "transport_catalogue.h"
 
 #include <ostream>
@@ -40,11 +39,24 @@ ostream& operator<<(ostream& out, StatStops stat) {
     return out;
 }
 
+string ReadLine(istream& in) {
+    string s;
+    getline(in, s);
+    return s;
+}
+
+int ReadLineWithNumber(istream& in) {
+    int result;
+    in >> result;
+    ReadLine(in);
+    return result;
+}
+
 void ReturnStats(TransportCatalogue& transport, istream& in, ostream& out) {
-    int count = input::ReadLineWithNumber(in);
+    int count = ReadLineWithNumber(in);
 
     for (int it = 0; it < count; ++it) {
-        string command = input::ReadLine(in);
+        string command = ReadLine(in);
         if (command[0] == 'B') {
             DisplayStatBus(transport, command, out);
         } else if (command[0] == 'S') {

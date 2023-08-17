@@ -10,6 +10,9 @@
 namespace transport_catalogue {
 namespace output {
 
+std::string ReadLine(std::istream& in);
+int ReadLineWithNumber(std::istream& in);
+
 void ReturnStats(TransportCatalogue& transport, std::istream& in, std::ostream& out);
 
 void DisplayStatBus(TransportCatalogue& transport, std::string_view command, std::ostream& out);

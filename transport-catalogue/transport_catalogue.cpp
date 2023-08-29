@@ -29,15 +29,15 @@ void TransportCatalogue::AddBus(const Bus& bus_) {
     }
 }
 
-Stop* TransportCatalogue::FindStop(string_view stop_name) {
+Stop* TransportCatalogue::FindStop(string_view stop_name) const {
     return named_stops_.count(stop_name) ? named_stops_.at(stop_name) : nullptr;
 }
 
-Bus* TransportCatalogue::FindBus(string_view bus_name) {
+Bus* TransportCatalogue::FindBus(string_view bus_name) const {
     return named_buses_.count(bus_name) ? named_buses_.at(bus_name) : nullptr;
 }
 
-int TransportCatalogue::FindDistance(Stop* stop_from, Stop* stop_to) {
+int TransportCatalogue::FindDistance(Stop* stop_from, Stop* stop_to) const {
     if (distance_.count({stop_from, stop_to})) {
         return distance_.at({stop_from, stop_to});
     } else if (distance_.count({stop_to, stop_from})) {
@@ -46,8 +46,7 @@ int TransportCatalogue::FindDistance(Stop* stop_from, Stop* stop_to) {
     return 0;
 }
 
-StatBuses TransportCatalogue::ReturnStatBus(string_view bus_name) {
-    bus_name.remove_prefix(bus_name.find(' ') + 1);
+StatBuses TransportCatalogue::ReturnStatBus(string_view bus_name) const {
     auto bus = FindBus(bus_name);
     if (bus) {
         int route = bus->route.size();
@@ -71,8 +70,7 @@ StatBuses TransportCatalogue::ReturnStatBus(string_view bus_name) {
     return {};
 }
 
-StatStops TransportCatalogue::ReturnStatStop(string_view stop_name) {
-    stop_name.remove_prefix(stop_name.find(' ') + 1);
+StatStops TransportCatalogue::ReturnStatStop(string_view stop_name) const {
     auto stop = FindStop(stop_name);
     if (stop) {
         return {false, stops_buses_.at(stop)};

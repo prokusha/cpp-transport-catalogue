@@ -1,4 +1,3 @@
-#include <variant>
 #define _USE_MATH_DEFINES
 #pragma once
 
@@ -10,6 +9,7 @@
 #include <vector>
 #include <optional>
 #include <cmath>
+#include <variant>
 
 namespace svg {
 
@@ -329,44 +329,5 @@ public:
     // Выводит в ostream svg-представление документа
     void Render(std::ostream& out) const;
 };
-
-
-namespace shapes {
-
-class Triangle : public Drawable {
-public:
-    Triangle(svg::Point p1, svg::Point p2, svg::Point p3) : p1_(p1), p2_(p2), p3_(p3) {}
-
-    void Draw(svg::ObjectContainer& container) const override;
-
-private:
-    svg::Point p1_, p2_, p3_;
-};
-
-class Star : public Drawable {
-public:
-    Star(svg::Point center, double outer_rad, double inner_rad, int num_rays) : polyline_(CreateStar(center, outer_rad, inner_rad, num_rays)) {}
-
-    void Draw(svg::ObjectContainer& container) const override;
-private:
-    svg::Polyline polyline_;
-
-    svg::Polyline CreateStar(svg::Point center, double outer_rad, double inner_rad, int num_rays);
-};
-
-class Snowman : public Drawable {
-public:
-    Snowman(svg::Point head, double radius) : head_(head), radius_(radius) {}
-
-    void Draw(svg::ObjectContainer& container) const override;
-
-private:
-    svg::Point head_;
-    double radius_;
-
-    std::vector<svg::Circle> MakeSnowMan() const;
-};
-
-} // namespace shapes
 
 }  // namespace svg

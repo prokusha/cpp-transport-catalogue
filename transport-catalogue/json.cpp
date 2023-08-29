@@ -1,4 +1,5 @@
 #include "json.h"
+
 #include <cctype>
 #include <cstddef>
 #include <istream>

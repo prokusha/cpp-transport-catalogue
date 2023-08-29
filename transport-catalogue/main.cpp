@@ -1,14 +1,16 @@
-#include "input_reader.h"
-#include "stat_reader.h"
+#include "json_reader.h"
 #include "transport_catalogue.h"
+#include "request_handler.h"
 
 #include <iostream>
 
-using namespace std;
 using namespace transport_catalogue;
+using namespace std;
 
 int main() {
-    TransportCatalogue transport;
-    input::Add(transport, std::cin);
-    output::ReturnStats(transport, std::cin, std::cout);
+    TransportCatalogue db;
+    input::JsonReader reader(db, std::cin);
+    reader.Read();
+    output::JsonRequest request(db, reader.GetRequest(), std::cout);
+    request.Stats();
 }

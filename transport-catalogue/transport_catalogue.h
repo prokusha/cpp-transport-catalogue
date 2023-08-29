@@ -76,12 +76,12 @@ public:
     void AddStop(const Stop& stop_);
     void AddBus(const Bus& bus_);
 
-    Stop* FindStop(std::string_view stop_name);
-    Bus* FindBus(std::string_view bus_name);
-    int FindDistance(Stop* stop_from, Stop* stop_to);
+    Stop* FindStop(std::string_view stop_name) const;
+    Bus* FindBus(std::string_view bus_name) const;
+    int FindDistance(Stop* stop_from, Stop* stop_to) const;
 
-    StatBuses ReturnStatBus(std::string_view bus_name);
-    StatStops ReturnStatStop(std::string_view stop_name);
+    StatBuses ReturnStatBus(std::string_view bus_name) const;
+    StatStops ReturnStatStop(std::string_view stop_name) const;
 private:
     std::deque<Stop> stops_;
     std::deque<Bus> buses_;

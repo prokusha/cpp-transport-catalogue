@@ -11,6 +11,7 @@ int main() {
     TransportCatalogue db;
     input::JsonReader reader(db, std::cin);
     reader.Read();
-    output::JsonRequest request(db, reader.GetRequest(), std::cout);
-    request.Stats();
+    output::JsonRequest request(db, std::cout);
+    //request.Stats(reader.GetRequest());
+    request.RenderMap(reader.GetMapPreset());
 }

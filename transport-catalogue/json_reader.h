@@ -1,30 +1,24 @@
 #pragma once
 
-#include "json.h"
 #include "transport_catalogue.h"
-#include "domain.h"
+#include "request_handler.h"
+#include "json.h"
 
-#include <string>
-#include <vector>
+#include <istream>
+#include <ostream>
 
-namespace transport_catalogue {
-namespace input {
-
-class JsonReader : protected detail::Maker {
+class JsonReader : protected RequestHandler {
 public:
-    JsonReader(transport_catalogue::TransportCatalogue& db, std::istream& input) : db_(db), input_(input) {}
+    JsonReader(transport_catalogue::TransportCatalogue db, std::istream& input, std::ostream& output) : RequestHandler(db), input_(input), output_(output) {}
     void Read();
-    json::Node GetRequest();
 
 private:
     void Parse(const json::Node& node);
 
-    transport_catalogue::TransportCatalogue& db_;
+    std::vector<json::Node> waitlist_;
+
+    json::Node Stat;
+
     std::istream& input_;
-    json::Node request_;
+    std::ostream& output_;
 };
-
-} // namespace input
-} // namespace transport_catalogue
-
-

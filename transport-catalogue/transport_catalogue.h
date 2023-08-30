@@ -33,7 +33,7 @@ struct StatBuses {
 
 struct StatStops {
     bool empty = true;
-    std::set<std::string> name_bus;
+    std::unordered_set<Bus*> name_bus;
 };
 
 struct Hasher {
@@ -89,7 +89,7 @@ private:
 
     std::unordered_map<std::string_view, Stop*, Hasher> named_stops_;
     std::unordered_map<std::string_view, Bus*, Hasher> named_buses_;
-    std::unordered_map<Stop*, std::set<std::string>, HasherStop> stops_buses_;
+    std::unordered_map<Stop*, std::unordered_set<Bus*>, HasherStop> stops_buses_;
     std::unordered_map<std::pair<Stop*, Stop*>, int, HasherPair> distance_;
 };
 

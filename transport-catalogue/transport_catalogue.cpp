@@ -25,7 +25,7 @@ void TransportCatalogue::AddBus(const Bus& bus_) {
     buses_.push_back(bus_);
     named_buses_[buses_.back().name] = &buses_.back();
     for (auto& stop : buses_.back().route) {
-        stops_buses_[stop].insert(&buses_.back());
+        stops_buses_[stop].insert(buses_.back().name);
     }
 }
 

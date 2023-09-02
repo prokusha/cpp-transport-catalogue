@@ -58,7 +58,7 @@ void Polyline::RenderObject(const RenderContext& context) const {
     }
     out << "\"";
     RenderAttrs(out);
-    out << " />";
+    out << "/>";
 }
 
 // ------------ Text ------------------

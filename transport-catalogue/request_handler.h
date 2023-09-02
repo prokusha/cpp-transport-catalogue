@@ -2,24 +2,31 @@
 
 #include "json.h"
 #include "transport_catalogue.h"
+#include "map_renderer.h"
 #include "svg.h"
+
+namespace request {
 
 class RequestHandler {
 public:
-    // , const renderer::MapRenderer& renderer
-    RequestHandler(const transport_catalogue::TransportCatalogue& db) : db_(db) {}
+    RequestHandler(const transport_catalogue::TransportCatalogue& db, const renderer::MapRenderer& renderer) : db_(db), renderer_(renderer) {}
 
-    std::optional<transport_catalogue::StatBuses> GetBusStat(const std::string_view& bus_name) const;
+    json::Dict GetBusStat(const json::Dict& node) const;
 
-    std::optional<transport_catalogue::StatStops> GetStopStat(const std::string_view& stop_name) const;
+    json::Dict GetStopStat(const json::Dict& node) const;
+
+    json::Dict GetMapStat(const json::Dict& node) const;
 
     const std::unordered_set<transport_catalogue::Bus*> GetBusesByStop(const std::string_view& stop_name) const;
 
-    svg::Document RenderMap() const;
+    void RenderMap(svg::Document& map) const;
 
 private:
     const transport_catalogue::TransportCatalogue& db_;
-    //const renderer::MapRenderer& renderer_;
+    const renderer::MapRenderer& renderer_;
 };
+
+} // namespace request
+
 
 

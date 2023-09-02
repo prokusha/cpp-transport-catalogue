@@ -21,6 +21,7 @@ struct Stop {
 struct Bus {
     std::string name;
     std::deque<Stop*> route;
+    bool is_roundtrip;
 };
 
 struct StatBuses {

@@ -6,6 +6,8 @@
 #include "transport_catalogue.h"
 
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 
 using namespace transport_catalogue;
 
@@ -54,6 +56,55 @@ void Maker::MarkDistance(transport_catalogue::TransportCatalogue& db) {
             db.AddDistance(stop_from, stop_to, distance.AsInt());
         }
     }
+}
+
+json::Dict Maker::MakeBusStat(const int& id, const transport_catalogue::StatBuses& buses) const {
+    json::Dict stat;
+
+    stat.emplace("request_id", id);
+
+    if (buses.empty) {
+        stat.emplace("error_message", std::string("not found"));
+        return stat;
+    }
+
+    stat.emplace("curvature", buses.curvature);
+    stat.emplace("route_length", buses.length);
+    stat.emplace("stop_count", buses.route);
+    stat.emplace("unique_stop_count", buses.unique);
+
+    return stat;
+}
+
+json::Dict Maker::MakeStopStat(const int& id, const transport_catalogue::StatStops& stops) const {
+    json::Dict stat;
+
+    stat.emplace("request_id", id);
+
+    if (stops.empty) {
+        stat.emplace("error_message", std::string("not found"));
+        return stat;
+    }
+
+    json::Array buses;
+
+    for (const auto& bus : stops.name_bus) {
+        buses.push_back(json::Node(bus));
+    }
+
+    stat.emplace("buses", buses);
+
+    return stat;
+}
+
+json::Dict Maker::MakeMapStat(const int& id, const std::string& map) const {
+    json::Dict stat;
+
+    stat.emplace("request_id", id);
+
+    stat.emplace("map", map);
+
+    return stat;
 }
 
 } // namespace detail
@@ -127,12 +178,25 @@ void JsonReader::FillMap(const json::Dict& node) {
 
 void JsonReader::FillStat(const json::Array& node) {
     for (const json::Node& request : node) {
+        const int id = request.AsMap().at("id").AsInt();
         if (const auto& type = request.AsMap().at("type").AsString(); type == "Stop") {
-            stat_.push_back(std::move(GetStopStat(request.AsMap())));
+            const std::string name = request.AsMap().at("name").AsString();
+            stat_.push_back(std::move(
+                MakeStopStat(id, GetStopStat(name))
+            ));
         } else if (type == "Bus") {
-            stat_.push_back(std::move(GetBusStat(request.AsMap())));
+            const std::string name = request.AsMap().at("name").AsString();
+            stat_.push_back(std::move(
+                MakeBusStat(id, GetBusStat(name))
+            ));
         } else if (type == "Map") {
-            stat_.push_back(std::move(GetMapStat(request.AsMap())));
+            std::ostringstream out;
+            svg::Document map;
+            RenderMap(map);
+            map.Render(out);
+            stat_.push_back(std::move(
+                MakeMapStat(id, out.str())
+            ));
         }
     }
 }

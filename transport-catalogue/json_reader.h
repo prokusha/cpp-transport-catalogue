@@ -18,6 +18,9 @@ public:
     transport_catalogue::Stop MakeStop(const json::Dict& jstop);
     void MarkDistance(transport_catalogue::TransportCatalogue& db);
     transport_catalogue::Bus MakeBus(transport_catalogue::TransportCatalogue& db, const json::Dict& jbus);
+    json::Dict MakeBusStat(const int& id, const transport_catalogue::StatBuses& buses) const;
+    json::Dict MakeStopStat(const int& id, const transport_catalogue::StatStops& stops) const;
+    json::Dict MakeMapStat(const int& id, const std::string& map) const;
 
 private:
     std::vector<std::pair<std::string, json::Node>> distance_;

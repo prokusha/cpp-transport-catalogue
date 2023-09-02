@@ -11,13 +11,11 @@ class RequestHandler {
 public:
     RequestHandler(const transport_catalogue::TransportCatalogue& db, const renderer::MapRenderer& renderer) : db_(db), renderer_(renderer) {}
 
-    json::Dict GetBusStat(const json::Dict& node) const;
+    transport_catalogue::StatBuses GetBusStat(const std::string_view& node) const;
 
-    json::Dict GetStopStat(const json::Dict& node) const;
+    transport_catalogue::StatStops GetStopStat(const std::string_view& node) const;
 
-    json::Dict GetMapStat(const json::Dict& node) const;
-
-    const std::unordered_set<transport_catalogue::Bus*> GetBusesByStop(const std::string_view& stop_name) const;
+    //const std::unordered_set<transport_catalogue::Bus*> GetBusesByStop(const std::string_view& stop_name) const;
 
     void RenderMap(svg::Document& map) const;
 

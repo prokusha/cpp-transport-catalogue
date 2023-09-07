@@ -51,60 +51,62 @@ void Maker::MarkDistance(transport_catalogue::TransportCatalogue& db) {
     Stop* stop_to = nullptr;
     for (auto& [from, stops] : distance_) {
         stop_from = db.FindStop(from);
-        for (auto& [to, distance] : stops.AsMap()) {
+        for (auto& [to, distance] : stops.AsDict()) {
             stop_to = db.FindStop(to);
             db.AddDistance(stop_from, stop_to, distance.AsInt());
         }
     }
 }
 
-json::Dict Maker::MakeBusStat(const int& id, const transport_catalogue::StatBuses& buses) const {
-    json::Dict stat;
+void Maker::MakeBusStat(const int& id, const transport_catalogue::StatBuses& buses) const {
+    build_.StartDict();
 
-    stat.emplace("request_id", id);
+    build_.Key("request_id").Value(id);
 
     if (buses.empty) {
-        stat.emplace("error_message", std::string("not found"));
-        return stat;
+        build_.Key("error_message").Value("not found");
+        build_.EndDict();
+        return;
     }
 
-    stat.emplace("curvature", buses.curvature);
-    stat.emplace("route_length", buses.length);
-    stat.emplace("stop_count", buses.route);
-    stat.emplace("unique_stop_count", buses.unique);
+    build_.Key("curvature").Value(buses.curvature);
+    build_.Key("route_length").Value(buses.length);
+    build_.Key("stop_count").Value(buses.route);
+    build_.Key("unique_stop_count").Value(buses.unique);
 
-    return stat;
+    build_.EndDict();
 }
 
-json::Dict Maker::MakeStopStat(const int& id, const transport_catalogue::StatStops& stops) const {
-    json::Dict stat;
+void Maker::MakeStopStat(const int& id, const transport_catalogue::StatStops& stops) const {
+    build_.StartDict();
 
-    stat.emplace("request_id", id);
+    build_.Key("request_id").Value(id);
 
     if (stops.empty) {
-        stat.emplace("error_message", std::string("not found"));
-        return stat;
+        build_.Key("error_message").Value("not found");
+        build_.EndDict();
+        return;
     }
 
-    json::Array buses;
+    build_.Key("buses").StartArray();
 
     for (const auto& bus : stops.name_bus) {
-        buses.push_back(json::Node(bus));
+        build_.Value(bus);
     }
 
-    stat.emplace("buses", buses);
+    build_.EndArray();
 
-    return stat;
+    build_.EndDict();
 }
 
-json::Dict Maker::MakeMapStat(const int& id, const std::string& map) const {
-    json::Dict stat;
+void Maker::MakeMapStat(const int& id, const std::string& map) const {
+    build_.StartDict();
 
-    stat.emplace("request_id", id);
+    build_.Key("request_id").Value(id);
 
-    stat.emplace("map", map);
+    build_.Key("map").Value(map);
 
-    return stat;
+    build_.EndDict();
 }
 
 } // namespace detail
@@ -115,7 +117,7 @@ void JsonReader::Read(std::istream& input) {
 }
 
 void JsonReader::ReturnStat(std::ostream& output) {
-    json::Print(json::Document(json::Node(stat_)), output);
+    json::Print(json::Document(build_.Build()), output);
 }
 
 void JsonReader::ReturnMap(std::ostream& output) {
@@ -125,13 +127,13 @@ void JsonReader::ReturnMap(std::ostream& output) {
 }
 
 void JsonReader::Parse(const json::Node& node) {
-    if(node.IsMap()) {
-        const auto& map = node.AsMap();
+    if(node.IsDict()) {
+        const auto& map = node.AsDict();
         if (map.count("base_requests")) {
             FillData(map.at("base_requests").AsArray());
         }
         if (map.count("render_settings")) {
-            FillMap(map.at("render_settings").AsMap());
+            FillMap(map.at("render_settings").AsDict());
         }
         if (map.count("stat_requests")) {
             FillStat(map.at("stat_requests").AsArray());
@@ -141,14 +143,14 @@ void JsonReader::Parse(const json::Node& node) {
 
 void JsonReader::FillData(const json::Array& node) {
     for (const auto& request : node) {
-        if (auto type = request.AsMap().at("type").AsString(); type == "Stop") {
-            db_.AddStop(std::move(MakeStop(request.AsMap())));
+        if (auto type = request.AsDict().at("type").AsString(); type == "Stop") {
+            db_.AddStop(std::move(MakeStop(request.AsDict())));
         } else if (type == "Bus") {
             buslist_.push_back(request);
         }
     }
     for (const auto& request : buslist_) {
-        db_.AddBus(std::move(MakeBus(db_, request.AsMap())));
+        db_.AddBus(std::move(MakeBus(db_, request.AsDict())));
     }
     MarkDistance(db_);
 }
@@ -159,7 +161,7 @@ void JsonReader::FillMap(const json::Dict& node) {
     std::vector<Bus*> buses;
     std::vector<Stop*> stops;
     for (const auto& buslist : buslist_) {
-        const auto& bus = db_.FindBus(buslist.AsMap().at("name").AsString());
+        const auto& bus = db_.FindBus(buslist.AsDict().at("name").AsString());
         buses.emplace_back(bus);
         for (const auto& stop : bus->route) {
             stops.push_back(stop);
@@ -177,28 +179,24 @@ void JsonReader::FillMap(const json::Dict& node) {
 }
 
 void JsonReader::FillStat(const json::Array& node) {
+    build_.StartArray();
     for (const json::Node& request : node) {
-        const int id = request.AsMap().at("id").AsInt();
-        if (const auto& type = request.AsMap().at("type").AsString(); type == "Stop") {
-            const std::string name = request.AsMap().at("name").AsString();
-            stat_.push_back(std::move(
-                MakeStopStat(id, GetStopStat(name))
-            ));
+        const int id = request.AsDict().at("id").AsInt();
+        if (const auto& type = request.AsDict().at("type").AsString(); type == "Stop") {
+            const std::string name = request.AsDict().at("name").AsString();
+            MakeStopStat(id, GetStopStat(name));
         } else if (type == "Bus") {
-            const std::string name = request.AsMap().at("name").AsString();
-            stat_.push_back(std::move(
-                MakeBusStat(id, GetBusStat(name))
-            ));
+            const std::string name = request.AsDict().at("name").AsString();
+            MakeBusStat(id, GetBusStat(name));
         } else if (type == "Map") {
             std::ostringstream out;
             svg::Document map;
             RenderMap(map);
             map.Render(out);
-            stat_.push_back(std::move(
-                MakeMapStat(id, out.str())
-            ));
+            MakeMapStat(id, out.str());
         }
     }
+    build_.EndArray();
 }
 
 } // namespace json_reader

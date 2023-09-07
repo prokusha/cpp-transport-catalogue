@@ -1,3 +1,4 @@
+#include "json_builder.h"
 #include "json_reader.h"
 #include "map_renderer.h"
 #include "transport_catalogue.h"
@@ -11,7 +12,8 @@ using namespace std;
 int main() {
     TransportCatalogue db;
     renderer::MapRenderer renderer;
-    JsonReader reader(db, renderer);
+    json::Builder build;
+    JsonReader reader(db, renderer, build);
     reader.Read(std::cin);
     reader.ReturnStat(std::cout);
     //reader.ReturnMap(std::cout);

@@ -7,7 +7,6 @@ namespace json {
 class KeyItemContext;
 class ArrayItemContext;
 class DictItemContext;
-class ValueItemContext;
 
 class Builder {
 public:

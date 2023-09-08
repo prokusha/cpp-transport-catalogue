@@ -10,7 +10,7 @@ namespace json {
 
 KeyItemContext Builder::Key(std::string key) {
     if (nodes_stack_.empty() || !nodes_stack_.back()->IsDict()) {
-        throw std::logic_error("KEY");
+        throw std::logic_error("Key");
     }
 
     Dict& dict = std::get<Dict>(nodes_stack_.back()->GetValue());
@@ -34,7 +34,7 @@ Builder& Builder::Value(Node value) {
             Node& node_ = std::get<Dict>(nodes_stack_.back()->GetValue()).at(key);
             node_ = std::move(value);
         } else {
-            throw std::logic_error("");
+            throw std::logic_error("Value");
         }
     }
     return *this;
@@ -47,7 +47,7 @@ DictItemContext Builder::StartDict() {
 
 Builder& Builder::EndDict() {
     if (nodes_stack_.empty() || !nodes_stack_.back()->IsDict()) {
-        throw std::logic_error("");
+        throw std::logic_error("EndDict");
     }
     nodes_stack_.pop_back();
     return *this;
@@ -60,7 +60,7 @@ ArrayItemContext Builder::StartArray() {
 
 Builder& Builder::EndArray() {
     if (nodes_stack_.empty() || !nodes_stack_.back()->IsArray()) {
-        throw std::logic_error("");
+        throw std::logic_error("EndArray");
     }
     nodes_stack_.pop_back();
     return *this;
@@ -68,7 +68,7 @@ Builder& Builder::EndArray() {
 
 Node Builder::Build() {
     if (root_.IsNull() || !nodes_stack_.empty()) {
-        throw std::logic_error("");
+        throw std::logic_error("Build");
     }
     return root_;
 }

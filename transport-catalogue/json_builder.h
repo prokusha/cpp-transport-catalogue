@@ -86,7 +86,7 @@ void Builder::InsertNode(NODE node, std::string name) {
             node_ = node;
             nodes_stack_.emplace_back(&node_);
         } else {
-            throw std::logic_error("");
+            throw std::logic_error("Array/Dict");
         }
     }
 }

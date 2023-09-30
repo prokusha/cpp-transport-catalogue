@@ -4,12 +4,14 @@
 #include "map_renderer.h"
 #include "svg.h"
 #include "transport_catalogue.h"
+#include "transport_router.h"
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 
 using namespace transport_catalogue;
+using namespace transport_router;
 
 namespace json_reader {
 
@@ -58,7 +60,39 @@ void Maker::MarkDistance(transport_catalogue::TransportCatalogue& db) {
     }
 }
 
-void Maker::MakeBusStat(const int& id, const transport_catalogue::StatBuses& buses) const {
+void Maker::MakeRoute(const int id, const std::optional<Route>& route) {
+    build_.StartDict();
+
+    build_.Key("request_id").Value(id);
+
+    if (!route.has_value()) {
+        build_.Key("error_message").Value("not found");
+        build_.EndDict();
+        return;
+    }
+    double time = 0.0;
+    build_.Key("items").StartArray();
+    for (const auto& item : route.value()) {
+        time += item->stat.wait_time + item->stat.travel_time;
+        build_.StartDict();
+        build_.Key("stop_name").Value(item->from->name);
+        build_.Key("time").Value(item->stat.wait_time);
+        build_.Key("type").Value("Wait");
+        build_.EndDict();
+        build_.StartDict();
+        build_.Key("bus").Value(item->route->name);
+        build_.Key("time").Value(item->stat.travel_time);
+        build_.Key("span_count").Value(item->stat.count_stop);
+        build_.Key("type").Value("Bus");
+        build_.EndDict();
+    }
+    build_.EndArray();
+    build_.Key("total_time").Value(time);
+
+    build_.EndDict();
+}
+
+void Maker::MakeBusStat(const int id, const transport_catalogue::StatBuses& buses) const {
     build_.StartDict();
 
     build_.Key("request_id").Value(id);
@@ -77,7 +111,7 @@ void Maker::MakeBusStat(const int& id, const transport_catalogue::StatBuses& bus
     build_.EndDict();
 }
 
-void Maker::MakeStopStat(const int& id, const transport_catalogue::StatStops& stops) const {
+void Maker::MakeStopStat(const int id, const transport_catalogue::StatStops& stops) const {
     build_.StartDict();
 
     build_.Key("request_id").Value(id);
@@ -99,7 +133,7 @@ void Maker::MakeStopStat(const int& id, const transport_catalogue::StatStops& st
     build_.EndDict();
 }
 
-void Maker::MakeMapStat(const int& id, const std::string& map) const {
+void Maker::MakeMapStat(const int id, const std::string& map) const {
     build_.StartDict();
 
     build_.Key("request_id").Value(id);
@@ -129,6 +163,9 @@ void JsonReader::ReturnMap(std::ostream& output) {
 void JsonReader::Parse(const json::Node& node) {
     if(node.IsDict()) {
         const auto& map = node.AsDict();
+        if (map.count("routing_settings")) {
+            FillRouteSettings(map.at("routing_settings").AsDict());
+        }
         if (map.count("base_requests")) {
             FillData(map.at("base_requests").AsArray());
         }
@@ -139,6 +176,15 @@ void JsonReader::Parse(const json::Node& node) {
             FillStat(map.at("stat_requests").AsArray());
         }
     }
+}
+
+void JsonReader::FillRouteSettings(const json::Dict& node) {
+    RoutingSettings routing_settings;
+
+    routing_settings.bus_wait_time = node.at("bus_wait_time").AsInt();
+    routing_settings.bus_velocity = node.at("bus_velocity").AsDouble();
+
+    router_.SetSettings(routing_settings);
 }
 
 void JsonReader::FillData(const json::Array& node) {
@@ -153,6 +199,7 @@ void JsonReader::FillData(const json::Array& node) {
         db_.AddBus(std::move(MakeBus(db_, request.AsDict())));
     }
     MarkDistance(db_);
+    router_.ConstructRouting();
 }
 
 void JsonReader::FillMap(const json::Dict& node) {
@@ -188,6 +235,10 @@ void JsonReader::FillStat(const json::Array& node) {
         } else if (type == "Bus") {
             const std::string name = request.AsDict().at("name").AsString();
             MakeBusStat(id, GetBusStat(name));
+        } else if (type == "Route") {
+            const std::string from = request.AsDict().at("from").AsString();
+            const std::string to = request.AsDict().at("to").AsString();
+            MakeRoute(id, router_.GetRoute(from, to));
         } else if (type == "Map") {
             std::ostringstream out;
             svg::Document map;

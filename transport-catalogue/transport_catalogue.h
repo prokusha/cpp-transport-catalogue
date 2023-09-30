@@ -71,8 +71,17 @@ private:
     std::hash<const void*> stop_hash;
 };
 
+using Stops = std::deque<Stop>;
+using Buses = std::deque<Bus>;
+
+using NamedStops = std::unordered_map<std::string_view, Stop*, Hasher>;
+using NamedBuses = std::unordered_map<std::string_view, Bus*, Hasher>;
+using StopsBuses = std::unordered_map<Stop*, std::set<std::string>, HasherStop>;
+using Distances = std::unordered_map<std::pair<Stop*, Stop*>, int, HasherPair>;
+
 class TransportCatalogue {
 public:
+
     void AddDistance(Stop* stop_from, Stop* stop_to, int dist);
     void AddStop(const Stop& stop_);
     void AddBus(const Bus& bus_);
@@ -83,15 +92,25 @@ public:
 
     StatBuses ReturnStatBus(std::string_view bus_name) const;
     StatStops ReturnStatStop(std::string_view stop_name) const;
+
+    const Stops& GetStops() const;
+    const Buses& GetBuses() const;
+
+    const NamedStops& GetNamedStops() const;
+    const NamedBuses& GetNamedBuses() const;
+
+    const StopsBuses& GetStopsBuses() const;
+    const Distances& GetDistanses() const;
+
 private:
-    std::deque<Stop> stops_;
-    std::deque<Bus> buses_;
+    Stops stops_;
+    Buses buses_;
     std::vector<std::pair<Stop*, std::string_view>> distance_temp_;
 
-    std::unordered_map<std::string_view, Stop*, Hasher> named_stops_;
-    std::unordered_map<std::string_view, Bus*, Hasher> named_buses_;
-    std::unordered_map<Stop*, std::set<std::string>, HasherStop> stops_buses_;
-    std::unordered_map<std::pair<Stop*, Stop*>, int, HasherPair> distance_;
+    NamedStops named_stops_;
+    NamedBuses named_buses_;
+    StopsBuses stops_buses_;
+    Distances distance_;
 };
 
 } //end transport_catalogue

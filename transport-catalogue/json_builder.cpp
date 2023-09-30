@@ -103,7 +103,7 @@ Builder& ItemContext::EndArray() {
     return builder_.EndArray();
 }
 
-DictItemContext KeyItemContext::Value(Node value) {
+ValueItemContext KeyItemContext::Value(Node value) {
     return ItemContext::Value(std::move(value));
 }
 

@@ -78,4 +78,28 @@ StatStops TransportCatalogue::ReturnStatStop(string_view stop_name) const {
     return {};
 }
 
+const Stops& TransportCatalogue::GetStops() const {
+    return stops_;
+}
+
+const Buses& TransportCatalogue::GetBuses() const {
+    return buses_;
+}
+
+const NamedStops& TransportCatalogue::GetNamedStops() const {
+    return named_stops_;
+}
+
+const NamedBuses& TransportCatalogue::GetNamedBuses() const {
+    return named_buses_;
+}
+
+const StopsBuses& TransportCatalogue::GetStopsBuses() const {
+    return stops_buses_;
+}
+
+const Distances& TransportCatalogue::GetDistanses() const {
+    return distance_;
+}
+
 } //end transport_catalogue

@@ -8,6 +8,8 @@ class KeyItemContext;
 class ArrayItemContext;
 class DictItemContext;
 
+using ValueItemContext = DictItemContext;
+
 class Builder {
 public:
     KeyItemContext Key(std::string key);
@@ -44,7 +46,7 @@ private:
 class KeyItemContext : public ItemContext {
 public:
     KeyItemContext(Builder& builder) : ItemContext(builder) {}
-    DictItemContext Value(Node value);
+    ValueItemContext Value(Node value);
     KeyItemContext Key(std::string Key) = delete;
     Builder& EndDict() = delete;
     Builder& EndArray() = delete;

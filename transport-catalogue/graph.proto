@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "transport_router.proto";
+
+package transport_catalogue_protobuf; 
+
+message Edge {
+    uint32 from = 1;
+    uint32 to = 2;
+    RoutingStats weigth = 3;
+}
+
+message incidence {
+    repeated uint32 EdgeId = 1;
+}
+
+message DirectedWeightedGraph {
+    repeated Edge edges = 1;
+    repeated incidence incidence_lists = 2;
+}

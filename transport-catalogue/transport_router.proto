@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package transport_catalogue_protobuf; 
+
+message EdgeId {
+	uint32 has_value = 1;
+	uint32 edge_id = 2;
+}
+
+message RouteInternalData {
+	uint32 has_value = 1;
+	RoutingStats weight = 2;
+	EdgeId edge_id = 3;
+}
+
+message RouteInternalDataArr {
+	repeated RouteInternalData data = 1;
+}
+
+message Router {
+	repeated RouteInternalDataArr data = 1;
+}
+
+message RoutingSettings {
+    uint32 bus_wait_time = 1;
+    double bus_velocity = 2;
+}
+
+message RoutingStats {
+    uint32 count_stop = 1;
+    uint32 wait_time = 2;
+    double travel_time = 3;
+}
+
+message TransportRouter {
+    RoutingSettings settings = 1;
+
+    map<uint32, uint32> vexters = 2;
+
+    Router router_data = 3;
+}

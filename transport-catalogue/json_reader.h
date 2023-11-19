@@ -8,6 +8,7 @@
 #include "request_handler.h"
 #include "json.h"
 #include "transport_router.h"
+#include "serialization.h"
 
 #include <istream>
 #include <ostream>
@@ -38,24 +39,34 @@ private:
 
 class JsonReader : protected detail::Maker, protected request::RequestHandler {
 public:
-    JsonReader(transport_catalogue::TransportCatalogue& db, renderer::MapRenderer& renderer, json::Builder& build) : Maker(build), RequestHandler(db, renderer), db_(db), router_(db), renderer_(renderer), build_(build) {}
+    JsonReader(transport_catalogue::TransportCatalogue& db, renderer::MapRenderer& renderer, transport_router::TransportRouter& router, json::Builder& build) : Maker(build), RequestHandler(db, renderer), db_(db), router_(router), renderer_(renderer), build_(build) {}
     void Read(std::istream& input);
+    void StartParse();
     void ReturnStat(std::ostream& output);
     void ReturnMap(std::ostream& output);
+    void SetRouterData(serialization::TransportRouterData& RouterData);
+    const transport_router::TransportRouter& GetRouter() const;
+    serialization::serialization_settings ReturnSerializationSettings();
 private:
     transport_catalogue::TransportCatalogue& db_;
     renderer::MapRenderer& renderer_;
+    transport_router::TransportRouter& router_;
 
     std::vector<json::Node> buslist_;
 
     json::Builder& build_;
     svg::Document map_;
-    transport_router::TransportRouter router_;
+
+    json::Document doc_;
+
+    serialization::serialization_settings serialization_settings_;
 
     void Parse(const json::Node& node);
+    void FillSerializationSettings(const json::Dict& node);
     void FillRouteSettings(const json::Dict& node);
     void FillData(const json::Array& node);
-    void FillMap(const json::Dict& node);
+    void FillMapSettings(const json::Dict& node);
+    void FillMap();
     void FillStat(const json::Array& node);
 };
 

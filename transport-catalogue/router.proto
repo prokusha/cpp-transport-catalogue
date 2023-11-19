@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "transport_router.proto";
+
+package transport_catalogue_protobuf; 
+
+message RouteInternalData_it {
+    bool has_value = 3;
+    RoutingStats weigth = 1;
+    uint32 prev_edge = 2;
+}
+
+message RouteInternalData {
+    bool has_value = 2;
+    RouteInternalData_it route_internal_data = 1;
+}
+
+message RoutesInternalData {
+    repeated RouteInternalData routes = 1;
+}
+
+message Router {
+    repeated RoutesInternalData routes_iternal_data = 1;
+}

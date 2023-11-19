@@ -126,6 +126,7 @@ std::vector<svg::Text> NameStops::MakeText(const Stop* stop, const detail::Spher
 
 void MapRenderer::AddSettings(MapSettings settings) {
     settings_ = settings;
+    ready_ = false;
 }
 
 void MapRenderer::AddRoute(const std::vector<Bus*>& buses, const std::vector<Stop*>& stops, const std::vector<::detail::geo::Coordinates>& coordinates) {
@@ -139,6 +140,7 @@ void MapRenderer::AddRoute(const std::vector<Bus*>& buses, const std::vector<Sto
         dots_.emplace_back(std::make_unique<object::DotStop>(stop, proj, settings_));
         name_stops_.emplace_back(std::make_unique<object::NameStops>(stop, proj, settings_));
     }
+    ready_ = true;
 }
 
 void MapRenderer::GetRender(svg::Document& map) const {
@@ -146,6 +148,14 @@ void MapRenderer::GetRender(svg::Document& map) const {
     detail::DrawPicture(name_rouds_, map);
     detail::DrawPicture(dots_, map);
     detail::DrawPicture(name_stops_, map);
+}
+
+MapSettings MapRenderer::GetSettings() const {
+    return settings_;
+}
+
+bool MapRenderer::ReadyMap() const {
+    return ready_;
 }
 
 } // namespace renderer

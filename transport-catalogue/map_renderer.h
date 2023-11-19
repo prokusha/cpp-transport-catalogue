@@ -213,6 +213,8 @@ public:
     void AddSettings(MapSettings settings);
     void AddRoute(const std::vector<transport_catalogue::Bus*>& buses, const std::vector<transport_catalogue::Stop*>& stops, const std::vector<transport_catalogue::detail::geo::Coordinates>& coordinates);
     void GetRender(svg::Document& map) const;
+    MapSettings GetSettings() const;
+    bool ReadyMap() const;
 
 private:
     std::vector<std::unique_ptr<svg::Drawable>> roade_;
@@ -220,6 +222,8 @@ private:
     std::vector<std::unique_ptr<svg::Drawable>> dots_;
     std::vector<std::unique_ptr<svg::Drawable>> name_stops_;
     MapSettings settings_;
+
+    bool ready_ = false;
 };
 
 

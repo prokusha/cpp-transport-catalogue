@@ -17,12 +17,51 @@ RoutingStats operator+(const RoutingStats& lhs, const RoutingStats& rhs) {
 }
 
 void TransportRouter::ConvertVelocity() {
-    settings_.bus_velocity = settings_.bus_velocity * 1000 / 60;
+    settings_.bus_velocity = settings_.bus_velocity * KiM / HiM;
 }
 
 void TransportRouter::SetSettings(RoutingSettings& settings) {
     settings_ = settings;
     ConvertVelocity();
+}
+
+void TransportRouter::SetGraph(graph::DirectedWeightedGraph<RoutingStats> graph) {
+    graph_ = std::make_unique<graph::DirectedWeightedGraph<RoutingStats>>(graph);
+    FillGraph(db_.GetNamedBuses());
+}
+
+void TransportRouter::SetRouter(graph::RoutesInternalData<RoutingStats> rid) {
+    route_ = std::make_unique<graph::Router<RoutingStats>>(*graph_, rid);
+}
+
+void TransportRouter::SetVexters(RVertex& vexters) {
+    vexters_ = vexters;
+}
+
+const transport_catalogue::TransportCatalogue& TransportRouter::GetTransportCatalogue() const {
+    return db_;
+}
+
+RoutingSettings TransportRouter::GetSettings() const {
+    RoutingSettings settings = settings_;
+    settings.bus_velocity = settings.bus_velocity * HiM / KiM; 
+    return settings;
+}
+
+graph::DirectedWeightedGraph<RoutingStats> TransportRouter::GetGraph() const {
+    return *graph_;
+}
+
+graph::Router<RoutingStats> TransportRouter::GetRouter() const {
+    return *route_;
+}
+
+RVertex TransportRouter::GetVexters() const {
+    return vexters_;
+}
+
+REdge TransportRouter::GetEdges() const {
+    return edges_;
 }
 
 void TransportRouter::ConstructRouting() {

@@ -42,17 +42,32 @@ struct Routing {
 
 using Route = std::vector<const Routing*>;
 
-class TransportRouter {
-public:
-    using RVertex = std::unordered_map<const transport_catalogue::Stop*, graph::VertexId>;
-    using REdge = std::vector<Routing>;
-    using U_Graph = std::unique_ptr<graph::DirectedWeightedGraph<RoutingStats>>;
-    using U_Route = std::unique_ptr<graph::Router<RoutingStats>>;
+using RVertex = std::unordered_map<const transport_catalogue::Stop*, graph::VertexId>;
+using REdge = std::vector<Routing>;
+using U_Graph = std::unique_ptr<graph::DirectedWeightedGraph<RoutingStats>>;
+using U_Route = std::unique_ptr<graph::Router<RoutingStats>>;
 
+class TransportRouter {
+private:
+    const static int KiM = 1000;
+    const static int HiM = 60;
+public:
+    
     TransportRouter(const transport_catalogue::TransportCatalogue& db) : db_(db) {}
+    
     void SetSettings(RoutingSettings& settings);
+    void SetGraph(graph::DirectedWeightedGraph<RoutingStats> graph);
+    void SetRouter(graph::RoutesInternalData<RoutingStats> rid);
+    void SetVexters(RVertex& vexters);
 
     void ConstructRouting();
+
+    const transport_catalogue::TransportCatalogue& GetTransportCatalogue() const;
+    RoutingSettings GetSettings() const;
+    graph::DirectedWeightedGraph<RoutingStats> GetGraph() const;
+    graph::Router<RoutingStats> GetRouter() const;
+    RVertex GetVexters() const;
+    REdge GetEdges() const;
 
     std::optional<Route> GetRoute(std::string_view from, std::string_view to) const;
 private:

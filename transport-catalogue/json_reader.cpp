@@ -2,6 +2,7 @@
 #include "geo.h"
 #include "json.h"
 #include "map_renderer.h"
+#include "serialization.h"
 #include "svg.h"
 #include "transport_catalogue.h"
 #include "transport_router.h"
@@ -146,8 +147,11 @@ void Maker::MakeMapStat(const int id, const std::string& map) const {
 } // namespace detail
 
 void JsonReader::Read(std::istream& input) {
-    json::Document doc = json::Load(input);
-    Parse(doc.GetRoot());
+    doc_ = json::Load(input);
+}
+
+void JsonReader::StartParse() {
+    Parse(doc_.GetRoot());
 }
 
 void JsonReader::ReturnStat(std::ostream& output) {
@@ -155,9 +159,26 @@ void JsonReader::ReturnStat(std::ostream& output) {
 }
 
 void JsonReader::ReturnMap(std::ostream& output) {
+    if (!renderer_.ReadyMap()) {
+        FillMap();
+    }
     svg::Document map;
     RenderMap(map);
     map.Render(output);
+}
+
+const transport_router::TransportRouter& JsonReader::GetRouter() const {
+    return router_;
+}
+
+serialization::serialization_settings JsonReader::ReturnSerializationSettings() {
+    const auto& node = doc_.GetRoot();
+    if (node.IsDict()) {
+        const auto& map = node.AsDict();
+        if (map.count("serialization_settings"))
+            FillSerializationSettings(map.at("serialization_settings").AsDict());
+    }
+    return serialization_settings_;
 }
 
 void JsonReader::Parse(const json::Node& node) {
@@ -170,12 +191,16 @@ void JsonReader::Parse(const json::Node& node) {
             FillData(map.at("base_requests").AsArray());
         }
         if (map.count("render_settings")) {
-            FillMap(map.at("render_settings").AsDict());
+            FillMapSettings(map.at("render_settings").AsDict());
         }
         if (map.count("stat_requests")) {
             FillStat(map.at("stat_requests").AsArray());
         }
     }
+}
+
+void JsonReader::FillSerializationSettings(const json::Dict& node) {
+    serialization_settings_.name_file = node.at("file").AsString();
 }
 
 void JsonReader::FillRouteSettings(const json::Dict& node) {
@@ -202,15 +227,18 @@ void JsonReader::FillData(const json::Array& node) {
     router_.ConstructRouting();
 }
 
-void JsonReader::FillMap(const json::Dict& node) {
-    renderer_.AddSettings(renderer::MapSettings(node));
+void JsonReader::FillMapSettings(const json::Dict& node) {
+    renderer_.AddSettings(std::move(renderer::MapSettings(node)));
+}
+
+void JsonReader::FillMap() {
+    //renderer_.AddSettings(renderer::MapSettings(node));
     std::vector<::detail::geo::Coordinates> all_coords;
     std::vector<Bus*> buses;
     std::vector<Stop*> stops;
-    for (const auto& buslist : buslist_) {
-        const auto& bus = db_.FindBus(buslist.AsDict().at("name").AsString());
-        buses.emplace_back(bus);
-        for (const auto& stop : bus->route) {
+    for (const auto& bus : db_.GetBuses()) {
+        buses.emplace_back(db_.FindBus(bus.name));
+        for (const auto& stop : bus.route) {
             stops.push_back(stop);
             all_coords.push_back(stop->coordinate);
         }
@@ -240,6 +268,9 @@ void JsonReader::FillStat(const json::Array& node) {
             const std::string to = request.AsDict().at("to").AsString();
             MakeRoute(id, router_.GetRoute(from, to));
         } else if (type == "Map") {
+            if (!renderer_.ReadyMap()) {
+                FillMap();
+            }
             std::ostringstream out;
             svg::Document map;
             RenderMap(map);

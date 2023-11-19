@@ -119,6 +119,7 @@ inline bool operator!=(const Node& lhs, const Node& rhs) {
 
 class Document {
 public:
+    Document() = default;
     explicit Document(Node root)
         : root_(std::move(root)) {
     }

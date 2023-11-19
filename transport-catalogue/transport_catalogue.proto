@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "map_renderer.proto";
+import "transport_router.proto";
+import "graph.proto";
+
+package transport_catalogue_protobuf; 
+
+message Stop {
+    uint32 id = 1;
+    string name = 2;
+    double lat = 3;
+    double lng = 4;
+}
+
+message Bus {
+    string name = 1;
+    repeated uint32 stops = 2;
+    bool is_roundtrip = 3;
+}
+
+message Distance {
+    uint32 from = 1;
+    uint32 to = 2;
+    uint32 distance = 3;
+}
+
+message TransportCatalogue {
+    repeated Stop stops = 1;
+    repeated Bus buses = 2;
+    repeated Distance distances = 3;
+}
+
+message Catalogue {
+    TransportCatalogue transport_catalogue = 1;
+    MapSettings map_settings = 2;
+    TransportRouter transport_router = 3;
+
+    DirectedWeightedGraph graph = 4;
+}

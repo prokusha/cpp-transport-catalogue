@@ -58,8 +58,20 @@ uint32_t CalculateIdBus(It start, It end, std::string_view name) {
 transport_catalogue_protobuf::TransportCatalogue TransportCatalogueSerialization(const transport_catalogue::TransportCatalogue& TransportCatalogue);
 transport_catalogue::TransportCatalogue TransportCatalogueDeserialization(const transport_catalogue_protobuf::TransportCatalogue& TransportCatalogue_proto);
 
+void StopsSerializatoin(transport_catalogue_protobuf::TransportCatalogue& TransportCatalogue_proto, const transport_catalogue::Stops& Stops);
+void StopsDeserialization(transport_catalogue::TransportCatalogue& TransportCatalogue, const transport_catalogue_protobuf::TransportCatalogue& TransportCatalogue_proto);
+void BusesSerialization(transport_catalogue_protobuf::TransportCatalogue& TransportCatalogue_proto, const transport_catalogue::Stops& Stops, const transport_catalogue::Buses& Buses);
+void BusesDeserialization(transport_catalogue::TransportCatalogue& TransportCatalogue, const transport_catalogue::Stops& Stops, const transport_catalogue_protobuf::TransportCatalogue& TransportCatalogue_proto);
+void DistanceSerialization(transport_catalogue_protobuf::TransportCatalogue& TransportCatalogue_proto, const transport_catalogue::Stops& Stops, const transport_catalogue::Distances& Distances);
+void DistanceDeserialization(transport_catalogue::TransportCatalogue& TransportCatalogue, const transport_catalogue::Stops& Stops, const transport_catalogue_protobuf::TransportCatalogue& TransportCatalogue_proto);
+
 transport_catalogue_protobuf::TransportRouter TransportRouterSerialization(const transport_router::TransportRouter& TransportRouter);
 TransportRouter TransportRouterDeserialization(const transport_catalogue::TransportCatalogue& TransportCatalogue, const transport_catalogue_protobuf::TransportRouter& TransportRouter_proto);
+
+void RouterSettingsSerialization(transport_catalogue_protobuf::TransportRouter& TransportRouter_proto, const transport_router::TransportRouter& TransportRouter);
+void RouterSettingsDeserialization(TransportRouter& TransportRouter, const transport_catalogue_protobuf::TransportRouter& TransportRouter_proto);
+void RouterSerialization(transport_catalogue_protobuf::TransportRouter& TransportRouter_proto, const transport_router::TransportRouter& TransportRouter);
+void RouterDeserialization(TransportRouter& TransportRouter, const transport_catalogue::TransportCatalogue& TransportCatalogue, const transport_catalogue_protobuf::TransportRouter& TransportRouter_proto);
 
 transport_catalogue_protobuf::Color ColorSerialization(const svg::Color& Color);
 svg::Color ColorDeserialization(const transport_catalogue_protobuf::Color& Color_proto);
